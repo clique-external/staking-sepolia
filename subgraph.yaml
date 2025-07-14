@@ -1,0 +1,56 @@
+specVersion: 1.3.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Staking
+    network: sepolia
+    source:
+      address: "0x3a6464a7E5bd3C1915ecbDd558CbD9fA25003208"
+      abi: Staking
+      startBlock: 8755712
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - CommitStake
+        - ConfigCreated
+        - ConfigSet
+        - OwnershipHandoverCanceled
+        - OwnershipHandoverRequested
+        - OwnershipTransferred
+        - RequestUnstake
+        - RolesUpdated
+        - Staked
+        - ToppedUp
+        - Unstaked
+      abis:
+        - name: Staking
+          file: ./abis/Staking.json
+      eventHandlers:
+        - event: CommitStake(indexed uint256,bytes)
+          handler: handleCommitStake
+        - event: ConfigCreated(indexed uint256)
+          handler: handleConfigCreated
+        - event: ConfigSet(indexed uint256)
+          handler: handleConfigSet
+        - event: OwnershipHandoverCanceled(indexed address)
+          handler: handleOwnershipHandoverCanceled
+        - event: OwnershipHandoverRequested(indexed address)
+          handler: handleOwnershipHandoverRequested
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: RequestUnstake(indexed uint256,indexed address)
+          handler: handleRequestUnstake
+        - event: RolesUpdated(indexed address,indexed uint256)
+          handler: handleRolesUpdated
+        - event: Staked(indexed uint256,indexed address,indexed uint256)
+          handler: handleStaked
+        - event: ToppedUp(indexed uint256,indexed address,uint256)
+          handler: handleToppedUp
+        - event: Unstaked(indexed uint256,indexed address)
+          handler: handleUnstaked
+      file: ./src/staking.ts
