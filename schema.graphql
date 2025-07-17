@@ -7,42 +7,19 @@ type CommitStake @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
-type ConfigCreated @entity(immutable: true) {
-  id: Bytes!
-  configId: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type ConfigSet @entity(immutable: true) {
-  id: Bytes!
-  configId: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type OwnershipHandoverCanceled @entity(immutable: true) {
-  id: Bytes!
-  pendingOwner: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type OwnershipHandoverRequested @entity(immutable: true) {
-  id: Bytes!
-  pendingOwner: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type OwnershipTransferred @entity(immutable: true) {
-  id: Bytes!
-  oldOwner: Bytes! # address
-  newOwner: Bytes! # address
+type Config @entity(immutable: false) {
+  id: Int8! # uint256
+  bank: Bytes! # address
+  manager: Bytes! # address
+  token: Bytes! # address
+  interestRate: BigInt! # uint256
+  stakeDuration: BigInt! # uint256
+  cooldownDuration: BigInt! # uint256
+  maxStake: BigInt! # uint256
+  minStake: BigInt! # uint256
+  isActive: Boolean! # bool
+  isTopupEnabled: Boolean! # bool
+  isPublic: Boolean! # bool
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -52,15 +29,6 @@ type RequestUnstake @entity(immutable: true) {
   id: Bytes!
   stakingId: BigInt! # uint256
   recipient: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type RolesUpdated @entity(immutable: true) {
-  id: Bytes!
-  user: Bytes! # address
-  roles: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
