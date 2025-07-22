@@ -8,9 +8,46 @@ dataSources:
     name: Staking
     network: sepolia
     source:
-      address: "0xa5376Ff0e2246De7546fF67F9433130317186D72"
+      address: "0xD95fB2294fF87496D613865D36D74C284bCA7ceE"
       abi: Staking
-      startBlock: 8766324
+      startBlock: 8801024
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - CommitStake
+        - Config
+        - RequestUnstake
+        - Staked
+        - ToppedUp
+        - Unstaked
+      abis:
+        - name: Staking
+          file: ./abis/Staking.json
+      eventHandlers:
+        - event: CommitStake(indexed uint256,bytes)
+          handler: handleCommitStake
+        - event: RequestUnstake(indexed uint256,indexed address)
+          handler: handleRequestUnstake
+        - event: Staked(indexed uint256,indexed address,indexed uint256)
+          handler: handleStaked
+        - event: ToppedUp(indexed uint256,indexed address,uint256)
+          handler: handleToppedUp
+        - event: Unstaked(indexed uint256,indexed address)
+          handler: handleUnstaked
+        - event: ConfigCreated(indexed uint256)
+          handler: handleConfigCreated
+        - event: ConfigSet(indexed uint256)
+          handler: handleConfigSet
+      file: ./src/staking.ts
+  - kind: ethereum
+    name: Staking1
+    network: sepolia
+    source:
+      address: "0xD321F47D9C140487846C32B38Dab5de2bc7F2C54"
+      abi: Staking
+      startBlock: 8801024
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9

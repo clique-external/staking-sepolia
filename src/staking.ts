@@ -1,27 +1,32 @@
-import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
-import { log } from '@graphprotocol/graph-ts'
+import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
+import { log } from "@graphprotocol/graph-ts";
 import {
   CommitStake as CommitStakeEvent,
   ConfigCreated as ConfigCreatedEvent,
   ConfigSet as ConfigSetEvent,
   RequestUnstake as RequestUnstakeEvent,
+  SetConfigCall,
+  SetConfigCall__Inputs,
   Staked as StakedEvent,
   ToppedUp as ToppedUpEvent,
   Unstaked as UnstakedEvent,
-  SetConfigCall,
-  SetConfigCall__Inputs
-} from "../generated/Staking/Staking"
+} from "../generated/Staking/Staking";
 import {
   CommitStake,
   Config,
   RequestUnstake,
   Staked,
   ToppedUp,
-  Unstaked
-} from "../generated/schema"
+  Unstaked,
+} from "../generated/schema";
 
 export function handleConfigCreated(event: ConfigCreatedEvent): void {
-  let entity = new Config(event.params.configId.toI32())
+  let entity = new Config(
+    event.address.concatI32(event.params.configId.toI32()),
+  );
+
+  entity.configId = event.params.configId;
+  entity.contractAddress = event.address;
 
   let input = event.transaction.input;
 
@@ -29,73 +34,76 @@ export function handleConfigCreated(event: ConfigCreatedEvent): void {
 
   let manager = ethereum.decode(
     "address",
-    changetype<Bytes>(input.slice(68, 100))
+    changetype<Bytes>(input.slice(68, 100)),
   )!.toAddress();
   entity.manager = manager;
 
   let token = ethereum.decode(
     "address",
-    changetype<Bytes>(input.slice(100, 132))
+    changetype<Bytes>(input.slice(100, 132)),
   )!.toAddress();
   entity.token = token;
 
   let interestRate = ethereum.decode(
     "uint256",
-    changetype<Bytes>(input.slice(132, 164))
+    changetype<Bytes>(input.slice(132, 164)),
   )!.toBigInt();
   entity.interestRate = interestRate;
 
   let stakeDuration = ethereum.decode(
     "uint256",
-    changetype<Bytes>(input.slice(164, 196))
+    changetype<Bytes>(input.slice(164, 196)),
   )!.toBigInt();
   entity.stakeDuration = stakeDuration;
 
   let cooldownDuration = ethereum.decode(
     "uint256",
-    changetype<Bytes>(input.slice(196, 228))
+    changetype<Bytes>(input.slice(196, 228)),
   )!.toBigInt();
   entity.cooldownDuration = cooldownDuration;
 
   let maxStake = ethereum.decode(
     "uint256",
-    changetype<Bytes>(input.slice(228, 260))
+    changetype<Bytes>(input.slice(228, 260)),
   )!.toBigInt();
   entity.maxStake = maxStake;
 
   let minStake = ethereum.decode(
     "uint256",
-    changetype<Bytes>(input.slice(260, 292))
+    changetype<Bytes>(input.slice(260, 292)),
   )!.toBigInt();
   entity.minStake = minStake;
 
   let isActive = ethereum.decode(
     "bool",
-    changetype<Bytes>(input.slice(292, 324))
+    changetype<Bytes>(input.slice(292, 324)),
   )!.toBoolean();
   entity.isActive = isActive;
 
   let isTopupEnabled = ethereum.decode(
     "bool",
-    changetype<Bytes>(input.slice(324, 356))
+    changetype<Bytes>(input.slice(324, 356)),
   )!.toBoolean();
   entity.isTopupEnabled = isTopupEnabled;
 
   let isPublic = ethereum.decode(
     "bool",
-    changetype<Bytes>(input.slice(356, 388))
+    changetype<Bytes>(input.slice(356, 388)),
   )!.toBoolean();
   entity.isPublic = isPublic;
 
   entity.blockNumber = event.block.number;
   entity.blockTimestamp = event.block.timestamp;
   entity.transactionHash = event.transaction.hash;
+  entity.totalStaked = BigInt.fromI32(0);
 
-  entity.save()
+  entity.save();
 }
 
 export function handleConfigSet(event: ConfigSetEvent): void {
-  let entity = Config.load(event.params.configId.toI32())
+  let entity = Config.load(
+    event.address.concatI32(event.params.configId.toI32()),
+  );
 
   if (entity == null) {
     return;
@@ -104,67 +112,67 @@ export function handleConfigSet(event: ConfigSetEvent): void {
 
   let bank = ethereum.decode(
     "address",
-    changetype<Bytes>(input.slice(36, 68))
+    changetype<Bytes>(input.slice(36, 68)),
   )!.toAddress();
   entity.bank = bank;
 
   let manager = ethereum.decode(
     "address",
-    changetype<Bytes>(input.slice(68, 100))
+    changetype<Bytes>(input.slice(68, 100)),
   )!.toAddress();
   entity.manager = manager;
 
   let token = ethereum.decode(
     "address",
-    changetype<Bytes>(input.slice(100, 132))
+    changetype<Bytes>(input.slice(100, 132)),
   )!.toAddress();
   entity.token = token;
 
   let interestRate = ethereum.decode(
     "uint256",
-    changetype<Bytes>(input.slice(132, 164))
+    changetype<Bytes>(input.slice(132, 164)),
   )!.toBigInt();
   entity.interestRate = interestRate;
 
   let stakeDuration = ethereum.decode(
     "uint256",
-    changetype<Bytes>(input.slice(164, 196))
+    changetype<Bytes>(input.slice(164, 196)),
   )!.toBigInt();
   entity.stakeDuration = stakeDuration;
 
   let cooldownDuration = ethereum.decode(
     "uint256",
-    changetype<Bytes>(input.slice(196, 228))
+    changetype<Bytes>(input.slice(196, 228)),
   )!.toBigInt();
   entity.cooldownDuration = cooldownDuration;
 
   let maxStake = ethereum.decode(
     "uint256",
-    changetype<Bytes>(input.slice(228, 260))
+    changetype<Bytes>(input.slice(228, 260)),
   )!.toBigInt();
   entity.maxStake = maxStake;
 
   let minStake = ethereum.decode(
     "uint256",
-    changetype<Bytes>(input.slice(260, 292))
+    changetype<Bytes>(input.slice(260, 292)),
   )!.toBigInt();
   entity.minStake = minStake;
 
   let isActive = ethereum.decode(
     "bool",
-    changetype<Bytes>(input.slice(292, 324))
+    changetype<Bytes>(input.slice(292, 324)),
   )!.toBoolean();
   entity.isActive = isActive;
 
   let isTopupEnabled = ethereum.decode(
     "bool",
-    changetype<Bytes>(input.slice(324, 356))
+    changetype<Bytes>(input.slice(324, 356)),
   )!.toBoolean();
   entity.isTopupEnabled = isTopupEnabled;
 
   let isPublic = ethereum.decode(
     "bool",
-    changetype<Bytes>(input.slice(356, 388))
+    changetype<Bytes>(input.slice(356, 388)),
   )!.toBoolean();
   entity.isPublic = isPublic;
 
@@ -172,77 +180,116 @@ export function handleConfigSet(event: ConfigSetEvent): void {
   entity.blockTimestamp = event.block.timestamp;
   entity.transactionHash = event.transaction.hash;
 
-  entity.save()
+  entity.save();
 }
 
 export function handleCommitStake(event: CommitStakeEvent): void {
   let entity = new CommitStake(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.stakingId = event.params.stakingId
-  entity.commitment = event.params.commitment
+    event.transaction.hash.concatI32(event.logIndex.toI32()),
+  );
+  entity.stakingId = event.params.stakingId;
+  entity.commitment = event.params.commitment;
+  entity.contractAddress = event.address;
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  entity.blockNumber = event.block.number;
+  entity.blockTimestamp = event.block.timestamp;
+  entity.transactionHash = event.transaction.hash;
 
-  entity.save()
+  entity.save();
 }
 
 export function handleRequestUnstake(event: RequestUnstakeEvent): void {
   let entity = new RequestUnstake(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.stakingId = event.params.stakingId
-  entity.recipient = event.params.recipient
+    event.transaction.hash.concatI32(event.logIndex.toI32()),
+  );
+  entity.stakingId = event.params.stakingId;
+  entity.recipient = event.params.recipient;
+  entity.contractAddress = event.address;
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  entity.blockNumber = event.block.number;
+  entity.blockTimestamp = event.block.timestamp;
+  entity.transactionHash = event.transaction.hash;
 
-  entity.save()
+  entity.save();
 }
 
 export function handleStaked(event: StakedEvent): void {
   let entity = new Staked(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.stakingId = event.params.stakingId
-  entity.recipient = event.params.recipient
-  entity.amount = event.params.amount
+    event.address.concatI32(event.params.stakingId.toI32()),
+  );
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  let input = event.transaction.input;
 
-  entity.save()
+  let configId = ethereum.decode(
+    "uint256",
+    changetype<Bytes>(input.slice(4, 36)),
+  )!.toBigInt();
+  entity.configId = configId;
+
+  let config = Config.load(event.address.concatI32(configId.toI32()));
+  if (config != null) {
+    config.totalStaked = config.totalStaked.plus(event.params.amount);
+    config.save();
+  }
+
+  entity.stakingId = event.params.stakingId;
+  entity.recipient = event.params.recipient;
+  entity.contractAddress = event.address;
+  entity.amount = event.params.amount;
+
+  entity.blockNumber = event.block.number;
+  entity.blockTimestamp = event.block.timestamp;
+  entity.transactionHash = event.transaction.hash;
+
+  entity.save();
 }
 
 export function handleToppedUp(event: ToppedUpEvent): void {
   let entity = new ToppedUp(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.stakingId = event.params.stakingId
-  entity.recipient = event.params.recipient
-  entity.amount = event.params.amount
+    event.transaction.hash.concatI32(event.logIndex.toI32()),
+  );
+  entity.stakingId = event.params.stakingId;
+  entity.recipient = event.params.recipient;
+  entity.amount = event.params.amount;
+  entity.contractAddress = event.address;
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  let stake = Staked.load(
+    event.address.concatI32(event.params.stakingId.toI32()),
+  )!;
+  let config = Config.load(event.address.concatI32(stake.configId.toI32()))!;
 
-  entity.save()
+  config.totalStaked = config.totalStaked.plus(event.params.amount);
+  config.save();
+
+  entity.configId = stake.configId;
+  entity.blockNumber = event.block.number;
+  entity.blockTimestamp = event.block.timestamp;
+  entity.transactionHash = event.transaction.hash;
+
+  entity.save();
 }
 
 export function handleUnstaked(event: UnstakedEvent): void {
   let entity = new Unstaked(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.stakingId = event.params.stakingId
-  entity.recipient = event.params.recipient
+    event.transaction.hash.concatI32(event.logIndex.toI32()),
+  );
+  entity.stakingId = event.params.stakingId;
+  entity.recipient = event.params.recipient;
+  entity.contractAddress = event.address;
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  let stake = Staked.load(
+    event.address.concatI32(event.params.stakingId.toI32()),
+  )!;
+  let config = Config.load(event.address.concatI32(stake.configId.toI32()))!;
 
-  entity.save()
+  // FIXME(alannotnerd): Incorrect calculation for private staking
+  config.totalStaked = config.totalStaked.minus(stake.amount);
+  config.save();
+  entity.configId = stake.configId;
+
+  entity.blockNumber = event.block.number;
+  entity.blockTimestamp = event.block.timestamp;
+  entity.transactionHash = event.transaction.hash;
+
+  entity.save();
 }

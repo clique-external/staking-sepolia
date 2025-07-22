@@ -1,6 +1,7 @@
 type CommitStake @entity(immutable: true) {
   id: Bytes!
   stakingId: BigInt! # uint256
+  contractAddress: Bytes! # address
   commitment: Bytes! # bytes
   blockNumber: BigInt!
   blockTimestamp: BigInt!
@@ -8,10 +9,13 @@ type CommitStake @entity(immutable: true) {
 }
 
 type Config @entity(immutable: false) {
-  id: Int8! # uint256
+  id: Bytes! # uint256
+  configId: BigInt! # uint256
+  contractAddress: Bytes! # address
   bank: Bytes! # address
   manager: Bytes! # address
   token: Bytes! # address
+  totalStaked: BigInt! # uint256
   interestRate: BigInt! # uint256
   stakeDuration: BigInt! # uint256
   cooldownDuration: BigInt! # uint256
@@ -28,6 +32,7 @@ type Config @entity(immutable: false) {
 type RequestUnstake @entity(immutable: true) {
   id: Bytes!
   stakingId: BigInt! # uint256
+  contractAddress: Bytes! # address
   recipient: Bytes! # address
   blockNumber: BigInt!
   blockTimestamp: BigInt!
@@ -37,6 +42,8 @@ type RequestUnstake @entity(immutable: true) {
 type Staked @entity(immutable: true) {
   id: Bytes!
   stakingId: BigInt! # uint256
+  configId: BigInt! # uint256
+  contractAddress: Bytes! # address
   recipient: Bytes! # address
   amount: BigInt! # uint256
   blockNumber: BigInt!
@@ -48,6 +55,8 @@ type ToppedUp @entity(immutable: true) {
   id: Bytes!
   stakingId: BigInt! # uint256
   recipient: Bytes! # address
+  contractAddress: Bytes! # address
+  configId: BigInt! # uint256
   amount: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
@@ -57,6 +66,8 @@ type ToppedUp @entity(immutable: true) {
 type Unstaked @entity(immutable: true) {
   id: Bytes!
   stakingId: BigInt! # uint256
+  contractAddress: Bytes! # address
+  configId: BigInt! # uint256
   recipient: Bytes! # address
   blockNumber: BigInt!
   blockTimestamp: BigInt!
