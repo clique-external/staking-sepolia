@@ -271,7 +271,7 @@ export function handleToppedUp(event: ToppedUpEvent): void {
 }
 
 export function handleUnstaked(event: UnstakedEvent): void {
-  let selector = changetype<Bytes>(event.transaction.input.slice(4, 36));
+  let selector = changetype<Bytes>(event.transaction.input.slice(0, 4));
   if (selector.toHexString() == "0x50027f84") {
     return;
   }
