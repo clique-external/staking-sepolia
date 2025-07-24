@@ -280,18 +280,22 @@ export function handleUnstaked(event: UnstakedEvent): void {
   entity.recipient = event.params.recipient;
   entity.contractAddress = event.address;
 
+  let configId: BigInt;
   let stake = Staked.load(
     event.address.concatI32(event.params.stakingId.toI32()),
-  )!;
+  );
 
-  // FIXME(alannotnerd): Incorrect calculation for private staking
-  if (selector.toHexString() !== "0x50027f84") {
-    let config = Config.load(event.address.concatI32(stake.configId.toI32()))!;
-    config.totalStaked = config.totalStaked.minus(stake.amount);
-    config.save();
+  if (stake == null) {
+    return;
   }
-  
-  entity.configId = stake.configId;
+
+  let config = Config.load(event.address.concatI32(stake.configId.toI32()))!;
+  config.totalStaked = config.totalStaked.minus(stake.amount);
+  config.save();
+
+  configId = stake.configId;
+
+  entity.configId = configId;
   entity.blockNumber = event.block.number;
   entity.blockTimestamp = event.block.timestamp;
   entity.transactionHash = event.transaction.hash;
