@@ -7,6 +7,7 @@ import {
   RequestUnstake as RequestUnstakeEvent,
   SetConfigCall,
   SetConfigCall__Inputs,
+  StakeCall,
   Staked as StakedEvent,
   ToppedUp as ToppedUpEvent,
   Unstaked as UnstakedEvent,
@@ -270,6 +271,11 @@ export function handleToppedUp(event: ToppedUpEvent): void {
 }
 
 export function handleUnstaked(event: UnstakedEvent): void {
+  let selector = changetype<Bytes>(event.transaction.input.slice(4, 36));
+  if (selector.toHexString() == "0x50027f84") {
+    return;
+  }
+
   let entity = new Unstaked(
     event.transaction.hash.concatI32(event.logIndex.toI32()),
   );
