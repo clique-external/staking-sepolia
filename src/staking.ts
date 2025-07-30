@@ -271,8 +271,6 @@ export function handleToppedUp(event: ToppedUpEvent): void {
 }
 
 export function handleUnstaked(event: UnstakedEvent): void {
-  let selector = changetype<Bytes>(event.transaction.input.slice(0, 4));
-
   let entity = new Unstaked(
     event.transaction.hash.concatI32(event.logIndex.toI32()),
   );
@@ -281,19 +279,33 @@ export function handleUnstaked(event: UnstakedEvent): void {
   entity.contractAddress = event.address;
 
   let configId: BigInt;
+  let amount: BigInt;
+
   let stake = Staked.load(
     event.address.concatI32(event.params.stakingId.toI32()),
   );
 
   if (stake == null) {
-    return;
+    let selector = changetype<Bytes>(event.transaction.input.slice(0, 4));
+    log.info("selector: {}", [selector.toHexString()]);
+    if (selector.equals(Bytes.fromHexString("0x50027f84"))) {
+      configId = ethereum.decode(
+        "uint256",
+        changetype<Bytes>(event.transaction.input.slice(36, 68)),
+      )!.toBigInt();
+      amount = BigInt.fromI32(0);
+    } else {
+      log.warning("Unknown selector: {}", [selector.toHexString()]);
+      return;
+    }
+  } else {
+    configId = stake.configId;
+    amount = stake.amount;
   }
 
-  let config = Config.load(event.address.concatI32(stake.configId.toI32()))!;
-  config.totalStaked = config.totalStaked.minus(stake.amount);
+  let config = Config.load(event.address.concatI32(configId.toI32()))!;
+  config.totalStaked = config.totalStaked.minus(amount);
   config.save();
-
-  configId = stake.configId;
 
   entity.configId = configId;
   entity.blockNumber = event.block.number;
